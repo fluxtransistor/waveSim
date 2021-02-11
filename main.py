@@ -13,4 +13,4 @@ class Wave:
         self.phase = phase
         self.magnitude = magnitude
 
-    def
+    def 
