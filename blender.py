@@ -16,36 +16,34 @@ from blender import run
 run() # (optionally with arguments)
 """
 
-DEFAULT_WAVES = [Wave((-0.1,0),1),Wave((0.1,0),1)]
+DEFAULT_WAVES = [Wave((-0.1,0),0.6),Wave((0.1,0),0.6)]
 
 def run(waves=DEFAULT_WAVES,size=2,resolution=100,frames=120):
     point_array = intensity_array(waves,(resolution,resolution),0.1,resolution / size)
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.mesh.primitive_plane_add(size)
-    bpy.ops.object.mode_set(mode='EDIT')
-    if resolution > 102:
-        resolution = 102
-    bpy.ops.mesh.subdivide(number_cuts=resolution - 2)
-    bpy.ops.object.mode_set(mode='OBJECT')
     me = bpy.context.active_object.data
     bm = bmesh.new()
-    bm_out = bmesh.new()
-    bm.from_mesh(me)
-    vert_counter = 0
-    vlist = bm.verts
-    vlist = sorted(vlist,key=lambda v: (v.co.x, v.co.y))
-    for vert in vlist:
-        x,y=int(vert_counter // resolution) , int(vert_counter % resolution)
-        vc = vert.co
-        vc[2] = (x+y)/1000#point_array[x][y]
-        vert_counter += 1
-        bmesh.ops.create_vert(bm_out,co=vc)
-    bm_out.to_mesh(me)
+    minimum_coordinate = size / -2
+    increment = size / resolution
+    bmesh.ops.delete(bm, geom=bm.verts)
+    for x in range(resolution):
+        for y in range(resolution):
+            x_co = x * increment + minimum_coordinate
+            y_co = y * increment + minimum_coordinate
+            bmesh.ops.create_vert(bm, co=(x_co, y_co, point_array[x][y]))
+            bm.verts.ensure_lookup_table()
+            if x>0 and y>0:
+                face_verts = [bm.verts[x*resolution+y],
+                              bm.verts[(x-1)*resolution+y],
+                              bm.verts[x*resolution+y-1],
+                              bm.verts[(x-1)*resolution+y-1]]
+                bmesh.ops.contextual_create(bm, geom=face_verts)
+    bm.to_mesh(me)
     bm.free()
-    bm_out.free()
     bpy.ops.object.modifier_add(type='SUBSURF')
     bpy.context.object.modifiers["Subdivision"].levels = 3
     bpy.context.object.modifiers["Subdivision"].render_levels = 4
-    me = bpy.context.object.data
+    bpy.ops.object.mode_set(mode='OBJECT')
 
