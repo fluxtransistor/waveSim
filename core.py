@@ -1,5 +1,5 @@
 from math import sqrt, sin, radians
-from PIL import Image
+
 
 
 class Wave:
@@ -42,13 +42,3 @@ def intensity_array(waves, size, magnitude=1.0, scale=50, center=(0.0,0.0)):
 
 
 
-def demo():
-    waves = [Wave((-2,0)),Wave((2,0))]
-    array = intensity_array(waves, (640,480), 0.5)
-    im = Image.new("L",(640,480))
-    for x in range(640):
-        for y in range(480):
-            im.putpixel((x,y),int(array[x][y] * 128 + 128))
-    im.show()
-
-# demo()
