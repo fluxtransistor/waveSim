@@ -18,8 +18,8 @@ run() # (optionally with arguments)
 
 DEFAULT_WAVES = [Wave((-0.5,0),0.5),Wave((0.5,0),0.5)]
 
-def run(size=2,resolution=100,frames=120,waves=DEFAULT_WAVES):
-    point_array = intensity_array(waves,(resolution,resolution),0.1,resolution / size)
+def run(size=2,resolution=100,mag=0.1,waves=DEFAULT_WAVES):
+    point_array = intensity_array(waves,(resolution,resolution),mag,resolution / size)
     if bpy.ops.object.mode_set.poll():
         bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.mesh.primitive_plane_add(size)
